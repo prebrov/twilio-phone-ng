@@ -5,7 +5,7 @@ const mongoose = require('mongoose')
 
 mongoose.Promise = global.Promise
 
-const options =  { 
+const options =  {
   connectTimeoutMS: 10000,
   useNewUrlParser: true
 }
@@ -22,13 +22,13 @@ app.set('session', 'eatyourowndogfood')
 app.use(compression())
 app.enable('trust proxy')
 
-app.use(function (req, res, next) {
-  if (req.secure) {
-    next()
-  } else {
-    res.redirect('https://' + req.headers.host + req.url)
-  }
-})
+// app.use(function (req, res, next) {
+//   if (req.secure) {
+//     next()
+//   } else {
+//     res.redirect('https://' + req.headers.host + req.url)
+//   }
+// })
 
 app.use('/api/register', require('./router-register.js'))
 app.use('/api/login', require('./router-login.js'))

@@ -1,0 +1,46 @@
+version: '3.7'
+
+services:
+  phone:
+    container_name: phone
+    image: node:erbium
+    build: ./
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      - "MONGODB_URI=mongodb://mongodb:27017/phone"
+      # - "PORT=3000"
+      - "SESSION_SECRET=${SESSION_SECRET}"
+    # volumes:
+    #   - .:/usr/src/app
+    ports:
+      - "5000:5000"
+    networks:
+      clusternetwork:
+        aliases:
+          - phone
+
+  mongodb:
+    container_name: mongodb
+    image: mongo
+    restart: unless-stopped
+    volumes:
+      - mongodb:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      clusternetwork:
+        aliases:
+          - mongodb
+
+networks:
+  clusternetwork:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.0.0/24
+
+volumes:
+  mongodb:

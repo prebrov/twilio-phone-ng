@@ -8,16 +8,23 @@ services:
     restart: unless-stopped
     depends_on:
       - mongodb
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=twilio-phone-ng_webphone-network"
+      - "traefik.http.routers.phone.rule=Host(`phone.${DOMAIN}`)"
+      - "traefik.http.routers.phone.entrypoints=http"
+      - "traefik.http.routers.phone.middlewares=redirect@file"
+      - "traefik.http.routers.phone-secured.rule=Host(`phone.${DOMAIN}`)"
+      - "traefik.http.routers.phone-secured.entrypoints=https"
+      - "traefik.http.routers.phone-secured.middlewares=hsts@file"
+      - "traefik.http.routers.phone-secured.tls=true"
     environment:
       - "MONGODB_URI=mongodb://mongodb:27017/phone"
-      # - "PORT=3000"
       - "SESSION_SECRET=${SESSION_SECRET}"
-    # volumes:
-    #   - .:/usr/src/app
-    ports:
-      - "5000:5000"
+    # ports:
+    #  - "5000:5000"
     networks:
-      clusternetwork:
+      webphone-network:
         aliases:
           - phone
 
@@ -27,20 +34,22 @@ services:
     restart: unless-stopped
     volumes:
       - mongodb:/data/db
-    ports:
-      - "27017:27017"
+    # ports:
+    #  - "27017:27017"
     networks:
-      clusternetwork:
+      webphone-network:
         aliases:
           - mongodb
 
 networks:
-  clusternetwork:
+  webphone-network:
     driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: webphone-br
     ipam:
       driver: default
       config:
-        - subnet: 172.16.0.0/24
+        - subnet: ${IPV4_NETWORK:-172.16.1}.0/24
 
 volumes:
   mongodb:
